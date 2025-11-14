@@ -1,5 +1,16 @@
 # Express Docker Demo
 
+## Preface: What is Docker and why does tech care?
+
+Docker is a tool that lets developers package an app, its runtime, and its dependencies into a single “container.” You can think of a container like a lightweight, portable computer that always has the exact versions of Node.js, libraries, and system tools you expect. The tech industry loves Docker because:
+
+- Teams can share the same container image, so “works on my machine” bugs disappear.
+- Deployments are faster—ops teams run the exact image that developers tested.
+- Containers start quickly and use fewer resources than full virtual machines.
+- One laptop (or server) can run many isolated projects at once without version conflicts.
+
+This repo shows how to containerize a simple Express + Postgres app so learners can see those benefits in action.
+
 A minimal Express + Postgres "Hello World" API you can use to practice Dockerization. It loads database configuration from the provided `.env` file:
 
 ```
@@ -25,6 +36,7 @@ Follow this like a class lab. Each step tells you **what to do**, **what code yo
 
 ### Step 1 – Gather your ingredients
 
+- Download Docker Desktop from https://www.docker.com/products/docker-desktop/, choose your OS, and install it.
 - Source code lives in `src/index.js`.
 - Dependencies are listed in `package.json`.
 - Runtime configuration (DB credentials) lives in `.env`.
@@ -47,13 +59,13 @@ CMD ["npm", "start"]
 
 Line-by-line teaching notes:
 
-1. `FROM node:20-alpine AS base` – start from a tiny Linux image that already has Node 20; naming the stage `base` makes future multi-stage builds possible.
-2. `WORKDIR /app` – every following command runs from `/app`, so paths stay predictable.
-3. `COPY package.json ./` – copy only the dependency manifest first to take advantage of Docker layer caching.
+1. `FROM node:20-alpine AS base` – We start by specify the base image to use. In this case since we are using Node.js version 20, we pick the official Node image with the lightweight Alpine Linux variant to keep the image size small.
+2. `WORKDIR /app` – then we set the working directory inside the container to `/app`, so all subsequent commands run in that context.
+3. `COPY package.json ./` – copy the `package.json` file first to leverage Docker's layer caching for dependencies.
 4. `RUN npm install --production` – install just the dependencies needed at runtime (no devDependencies) to keep the image small.
-5. `COPY src ./src` – bring in the actual application code after dependencies are cached.
-6. `EXPOSE 3000` – document for humans/tools that the server listens on port 3000.
-7. `CMD ["npm", "start"]` – tell Docker how to boot the container; it runs the same script you use locally.
+5. `COPY src ./src` – bring in the actual application code after dependencies are cached. 'COPY . ./' would also work here, but copying only what you need is a best practice.
+6. `EXPOSE 3000` – tell the container runtime that the app listens on port 3000.
+7. `CMD ["npm", "start"]` – tell Docker how to boot the container; it runs the same script you use locally. We can also use `node src/index.js` here if we wanted to be more explicit.
 
 Checkpoint: run `docker build -t express-docker-demo .` to make sure the file works. If it finishes successfully, you now have an image you can run anywhere.
 

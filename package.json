@@ -1,0 +1,17 @@
+{
+  "name": "express-docker-demo",
+  "version": "1.0.0",
+  "author": "chee86j",
+  "description": "Simple Express + Postgres hello-world app Docker demo",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "NODE_ENV=development node src/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "pg": "^8.16.3"
+  }
+}

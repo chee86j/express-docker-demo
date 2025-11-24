@@ -1,3 +1,11 @@
+/*
+Entry point for the application with basic setup using Express for the API and PostgreSQL, 
+pool connection for database access. Upon successful database connection, the server will start the process
+by loading the env. variables and starting the server on the port specified in the environment variables.
+
+It will test the server and if it runs successfully it will return a JSON object w/the message
+"Hello World from Dockerized Express!"
+*/
 import express from "express";
 import dotenv from "dotenv";
 import pkg from "pg";
@@ -28,10 +36,13 @@ const pool = new Pool({
 const app = express();
 
 // Routes to test server and database connectivity
+// If server ran successfully
 app.get("/", (req, res) => {
   res.json({ message: "Hello World from Dockerized Express!" });
 });
 
+// If database ran successfully return a JSON object w/the status "ok" and the database name and server time else
+// with the status "error" and the error message
 app.get("/db-check", async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT NOW() AS server_time");

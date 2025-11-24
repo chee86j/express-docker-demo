@@ -1,0 +1,33 @@
+# This Docker Compose file allows you to run both the application and its PostgreSQL database
+# with a single command (`docker-compose up`). It defines the services, environment variables,
+# health checks, volumes, and networking (using Docker's default network) that you would
+# otherwise configure manually on hosting platforms like Vercel, Railway, AWS, or Azure.
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      DB_HOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+volumes:
+  postgres-data:

@@ -1,3 +1,6 @@
+# This file is a near-universal standard for defining, running, and sharing a multi-service app
+# (Express + Postgres) in development and testing.
+
 # This Docker Compose file allows you to run both the application and its PostgreSQL database
 # with a single command (`docker-compose up`). It defines the services, environment variables,
 # health checks, volumes, and networking (using Docker's default network) that you would

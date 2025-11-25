@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Express Docker Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Manrope:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <div class="hero__badge">Live API</div>
+        <h1>Express Docker Demo</h1>
+        <p>
+          A small UI that fetches the JSON objects from your containerized API so you can see them
+          without opening a terminal.
+        </p>
+        <div class="hero__actions">
+          <button id="refresh" type="button">Refresh data</button>
+          <a class="link" href="/api/hello" target="_blank" rel="noreferrer">View raw JSON</a>
+        </div>
+      </header>
+
+      <section class="grid">
+        <article class="card">
+          <div class="card__label">Hello endpoint</div>
+          <h2>API message</h2>
+          <p class="card__hint">Fetched from <code>/api/hello</code></p>
+          <pre id="hello-response" class="code-block">Loading...</pre>
+        </article>
+
+        <article class="card">
+          <div class="card__label card__label--accent">Database check</div>
+          <h2>Postgres status</h2>
+          <p class="card__hint">Fetched from <code>/db-check</code></p>
+          <div id="db-pill" class="status-pill status-pill--pending">Waiting...</div>
+          <pre id="db-response" class="code-block">Loading...</pre>
+        </article>
+      </section>
+
+      <section class="footnote">
+        <p>
+          This page is static and served from the Express app. Use it to confirm the container and
+          database are responding.
+        </p>
+      </section>
+    </main>
+
+    <script>
+      const helloTarget = document.getElementById("hello-response");
+      const dbTarget = document.getElementById("db-response");
+      const dbPill = document.getElementById("db-pill");
+      const refreshBtn = document.getElementById("refresh");
+
+      const prettify = (data) => JSON.stringify(data, null, 2);
+
+      async function fetchAndRender(endpoint, target, statusCb) {
+        target.textContent = "Loading...";
+        target.dataset.state = "loading";
+        try {
+          const res = await fetch(endpoint);
+          if (!res.ok) {
+            throw new Error(`${res.status} ${res.statusText}`);
+          }
+          const data = await res.json();
+          target.textContent = prettify(data);
+          target.dataset.state = "success";
+          if (statusCb) statusCb(true, data);
+        } catch (error) {
+          target.textContent = `Request failed: ${error.message}`;
+          target.dataset.state = "error";
+          if (statusCb) statusCb(false);
+        }
+      }
+
+      function updateDbPill(isOk, data) {
+        if (!dbPill) return;
+        dbPill.className = `status-pill ${isOk ? "status-pill--ok" : "status-pill--error"}`;
+        dbPill.textContent = isOk ? "Healthy" : "Unavailable";
+        dbPill.title = isOk && data?.serverTime ? `Server time: ${data.serverTime}` : "";
+      }
+
+      async function loadData() {
+        await Promise.all([
+          fetchAndRender("/api/hello", helloTarget),
+          fetchAndRender("/db-check", dbTarget, updateDbPill),
+        ]);
+      }
+
+      refreshBtn?.addEventListener("click", () => loadData());
+
+      loadData();
+    </script>
+  </body>
+</html>

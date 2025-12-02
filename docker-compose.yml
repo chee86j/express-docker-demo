@@ -5,6 +5,10 @@
 # with a single command (`docker-compose up`). It defines the services, environment variables,
 # health checks, volumes, and networking (using Docker's default network) that you would
 # otherwise configure manually on hosting platforms like Vercel, Railway, AWS, or Azure.
+# Stack map:
+# docker-compose.yml (this file)
+# ├─ app service -> builds Dockerfile -> runs src/index.js (API only)
+# └─ postgres service -> used by /db-check route in src/index.js
 
 services:
   app:

@@ -1,21 +1,17 @@
 /*
-Entry point for the application with basic setup using Express for the API and PostgreSQL
-pool connection. It serves a static UI from /public and exposes API routes for the demo.
-Upon successful database connection, the server will start using the configured port.
+Project map:
+express-docker-demo/
+├─ src/index.js (this file: Express API + Postgres pool)
+├─ Dockerfile (builds and runs this server)
+└─ docker-compose.yml (builds app + Postgres for /db-check)
 */
 import express from "express";
 import dotenv from "dotenv";
 import pkg from "pg";
-import path from "path";
-import { fileURLToPath } from "url";
 
 dotenv.config();
 
 const { Pool } = pkg;
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const publicDir = path.join(__dirname, "../public");
 
 // Load environment variables with defaults
 const {
@@ -38,7 +34,13 @@ const pool = new Pool({
 
 const app = express();
 
-app.use(express.static(publicDir));
+// Simple landing route since there's no static UI
+app.get("/", (req, res) => {
+  res.json({
+    message: "Express Docker demo API",
+    endpoints: ["/api/hello", "/db-check"],
+  });
+});
 
 // Routes to test server and database connectivity
 app.get("/api/hello", (req, res) => {

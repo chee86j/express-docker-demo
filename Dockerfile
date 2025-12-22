@@ -14,6 +14,7 @@ RUN npm install --production
 
 # Copy the application code to the working directory
 COPY src ./src
+COPY public ./public
 
 # Expose the port the app runs on
 EXPOSE 3000

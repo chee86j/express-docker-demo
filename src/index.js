@@ -8,6 +8,8 @@ express-docker-demo/
 import express from "express";
 import dotenv from "dotenv";
 import pkg from "pg";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
@@ -34,8 +36,20 @@ const pool = new Pool({
 
 const app = express();
 
-// Simple landing route since there's no static UI
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const publicDir = path.join(__dirname, "..", "public");
+
+// Serve the static UI that lives in /public
+app.use(express.static(publicDir));
+
+// Landing page: send the HTML UI instead of raw JSON
 app.get("/", (req, res) => {
+  res.sendFile(path.join(publicDir, "index.html"));
+});
+
+// Provide the previous JSON landing payload from /api for API consumers
+app.get("/api", (req, res) => {
   res.json({
     message: "Express Docker demo API",
     endpoints: ["/api/hello", "/db-check"],
